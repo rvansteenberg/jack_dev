@@ -1,47 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Jack Visualizer (ESM)</title>
-
-  <!--
-    ============================
-    JACK VISUALIZER — NOTES (ES MODULE VERSION)
-    ============================
-
-    This version uses:
-      • three.module.js (ESM)
-      • OrbitControls from /examples/jsm/
-      • No global THREE namespace
-      • Modern import syntax
-      • Fully compatible with GitHub Pages
-
-    Structure:
-      • Import Three.js + OrbitControls
-      • Create scene, camera, renderer
-      • Add Jack origin sphere
-      • Add triad axes
-      • Add OrbitControls for camera movement
-      • Animate
-
-    You can expand this with:
-      • J‑stack geometry
-      • Cockpit frame
-      • Porphemic layers
-      • Labels, animation, transforms
-  -->
-
-  <style>
-    body { margin: 0; overflow: hidden; }
-  </style>
-</head>
-
-<body>
-
-<!-- ES MODULE SCRIPT -->
 <script type="module">
 
-  // --- Import Three.js and OrbitControls ---
   import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js";
   import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js";
 
@@ -61,12 +19,10 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  // --- Orbit Controls (camera movement) ---
+  // --- Orbit Controls ---
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
-  controls.rotateSpeed = 0.8;
-  controls.zoomSpeed = 1.0;
 
   // --- Jack Origin (white sphere) ---
   const sphereGeo = new THREE.SphereGeometry(0.1, 16, 16);
@@ -82,15 +38,11 @@
     return new THREE.Line(geometry, material);
   }
 
-  const Xhat = new THREE.Vector3(1,0,0);
-  const Yhat = new THREE.Vector3(0,1,0);
-  const Zhat = new THREE.Vector3(0,0,1);
+  scene.add(makeAxis(new THREE.Vector3(1,0,0), 0xff0000)); // X
+  scene.add(makeAxis(new THREE.Vector3(0,1,0), 0x00ff00)); // Y
+  scene.add(makeAxis(new THREE.Vector3(0,0,1), 0x0000ff)); // Z
 
-  scene.add(makeAxis(Xhat, 0xff0000)); // red
-  scene.add(makeAxis(Yhat, 0x00ff00)); // green
-  scene.add(makeAxis(Zhat, 0x0000ff)); // blue
-
-  // --- Handle window resize ---
+  // --- Resize Handling ---
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -100,12 +52,9 @@
   // --- Render Loop ---
   function animate() {
     requestAnimationFrame(animate);
-    controls.update();  // smooth camera motion
+    controls.update();
     renderer.render(scene, camera);
   }
   animate();
 
 </script>
-
-</body>
-</html>
