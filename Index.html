@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jack Visualizer</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+
+<script>
+// --- Basic Three.js Setup ---
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// --- Jack Origin (a small sphere) ---
+const sphereGeo = new THREE.SphereGeometry(0.1, 16, 16);
+const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const jackOrigin = new THREE.Mesh(sphereGeo, sphereMat);
+scene.add(jackOrigin);
+
+// --- Jack Axis (triad) ---
+function makeAxis(dir, color) {
+  const material = new THREE.LineBasicMaterial({ color });
+  const points = [ new THREE.Vector3(0,0,0), dir.clone().normalize() ];
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  return new THREE.Line(geometry, material);
+}
+
+const Xhat = new THREE.Vector3(1,0,0);
+const Yhat = new THREE.Vector3(0,1,0);
+const Zhat = new THREE.Vector3(0,0,1);
+
+scene.add(makeAxis(Xhat, 0xff0000)); // red
+scene.add(makeAxis(Yhat, 0x00ff00)); // green
+scene.add(makeAxis(Zhat, 0x0000ff)); // blue
+
+camera.position.z = 3;
+
+// --- Render Loop ---
+function animate() {
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+
+</body>
+</html>
