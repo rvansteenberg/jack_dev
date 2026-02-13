@@ -9,8 +9,9 @@
 </head>
 <body>
 
-<!-- Global THREE build (this is the one that already worked for you) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<!-- Three.js r149 (last version with global OrbitControls) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
 // --- Basic Three.js Setup ---
@@ -26,48 +27,50 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// --- OrbitControls (manual camera movement) ---
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.rotateSpeed = 0.8;
+controls.zoomSpeed = 1.0;
+
 // --- Jack Origin (white sphere) ---
-const sphereGeo = new THREE.SphereGeometry(0.1, 16, 16);
-const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const jackOrigin = new THREE.Mesh(sphereGeo, sphereMat);
-scene.add(jackOrigin);
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(0.1, 16, 16),
+  new THREE.MeshBasicMaterial({ color: 0xffffff })
+);
+scene.add(sphere);
 
 // --- Jack Axis (triad) ---
-function makeAxis(dir, color) {
-  const material = new THREE.LineBasicMaterial({ color });
-  const points = [ new THREE.Vector3(0,0,0), dir.clone().normalize() ];
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  return new THREE.Line(geometry, material);
+function axis(dir, color) {
+  return new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0,0,0),
+      dir.clone().normalize()
+    ]),
+    new THREE.LineBasicMaterial({ color })
+  );
 }
 
-scene.add(makeAxis(new THREE.Vector3(1,0,0), 0xff0000)); // X (red)
-scene.add(makeAxis(new THREE.Vector3(0,1,0), 0x00ff00)); // Y (green)
-scene.add(makeAxis(new THREE.Vector3(0,0,1), 0x0000ff)); // Z (blue)
+scene.add(axis(new THREE.Vector3(1,0,0), 0xff0000)); // X
+scene.add(axis(new THREE.Vector3(0,1,0), 0x00ff00)); // Y
+scene.add(axis(new THREE.Vector3(0,0,1), 0x0000ff)); // Z
 
 // --- Initial camera position ---
 camera.position.set(2, 2, 3);
 camera.lookAt(0, 0, 0);
 
-// --- Handle window resize ---
+// --- Resize Handling ---
 window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// --- Render Loop with camera orbit ---
+// --- Render Loop ---
 function animate() {
   requestAnimationFrame(animate);
-
-  const t = Date.now() * 0.0005; // time parameter
-  const radius = 3.0;
-
-  // simple circular orbit around the origin
-  camera.position.x = Math.cos(t) * radius;
-  camera.position.z = Math.sin(t) * radius;
-  camera.position.y = 1.5; // slight elevation
-  camera.lookAt(0, 0, 0);
-
+  controls.update(); // smooth manual movement
   renderer.render(scene, camera);
 }
 animate();

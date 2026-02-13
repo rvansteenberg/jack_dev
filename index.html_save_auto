@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jack Visualizer</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<!-- Global THREE build (this is the one that already worked for you) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
+<script>
+// --- Basic Three.js Setup ---
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// --- Jack Origin (white sphere) ---
+const sphereGeo = new THREE.SphereGeometry(0.1, 16, 16);
+const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const jackOrigin = new THREE.Mesh(sphereGeo, sphereMat);
+scene.add(jackOrigin);
+
+// --- Jack Axis (triad) ---
+function makeAxis(dir, color) {
+  const material = new THREE.LineBasicMaterial({ color });
+  const points = [ new THREE.Vector3(0,0,0), dir.clone().normalize() ];
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  return new THREE.Line(geometry, material);
+}
+
+scene.add(makeAxis(new THREE.Vector3(1,0,0), 0xff0000)); // X (red)
+scene.add(makeAxis(new THREE.Vector3(0,1,0), 0x00ff00)); // Y (green)
+scene.add(makeAxis(new THREE.Vector3(0,0,1), 0x0000ff)); // Z (blue)
+
+// --- Initial camera position ---
+camera.position.set(2, 2, 3);
+camera.lookAt(0, 0, 0);
+
+// --- Handle window resize ---
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// --- Render Loop with camera orbit ---
+function animate() {
+  requestAnimationFrame(animate);
+
+  const t = Date.now() * 0.0005; // time parameter
+  const radius = 3.0;
+
+  // simple circular orbit around the origin
+  camera.position.x = Math.cos(t) * radius;
+  camera.position.z = Math.sin(t) * radius;
+  camera.position.y = 1.5; // slight elevation
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+
+</body>
+</html>
